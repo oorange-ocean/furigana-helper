@@ -3,6 +3,7 @@ import '../../global.css';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SplashScreen, Stack } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
@@ -13,7 +14,6 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { APIProvider } from '@/api';
 import { hydrateAuth, loadSelectedTheme } from '@/core';
 import { useThemeConfig } from '@/core/use-theme-config';
-
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
@@ -26,13 +26,16 @@ loadSelectedTheme();
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const queryClient = React.useMemo(() => new QueryClient(), []);
   return (
     <Providers>
+      <QueryClientProvider client={queryClient}>
       <Stack>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack>
+      </QueryClientProvider>
     </Providers>
   );
 }

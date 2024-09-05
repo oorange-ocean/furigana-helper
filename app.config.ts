@@ -51,6 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-localization',
     'expo-router',
+    'expo-av',
     [
       'app-icon-badge',
       {

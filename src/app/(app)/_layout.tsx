@@ -1,9 +1,8 @@
 /* eslint-disable react/no-unstable-nested-components */
-import { Link, Redirect, SplashScreen, Tabs } from 'expo-router';
+import { Redirect, SplashScreen, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
 import { useAuth, useIsFirstTime } from '@/core';
-import { Pressable, Text } from '@/ui';
 import {
   Feed as FeedIcon,
   Settings as SettingsIcon,
@@ -33,14 +32,13 @@ export default function TabLayout() {
   return (
     <Tabs>
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Feed',
-          tabBarIcon: ({ color }) => <FeedIcon color={color} />,
-          headerRight: () => <CreateNewPostLink />,
-          tabBarTestID: 'feed-tab',
-        }}
-      />
+      name="songs"
+      options={{
+        title: 'Songs',
+        tabBarIcon: ({ color }) => <FeedIcon color={color} />,
+        tabBarTestID: 'songs-tab',
+      }}
+    />
 
       <Tabs.Screen
         name="style"
@@ -64,12 +62,3 @@ export default function TabLayout() {
   );
 }
 
-const CreateNewPostLink = () => {
-  return (
-    <Link href="/feed/add-post" asChild>
-      <Pressable>
-        <Text className="px-3 text-primary-300">Create</Text>
-      </Pressable>
-    </Link>
-  );
-};

@@ -1,4 +1,4 @@
-package com.myapp.staging
+package com.furiganahelper.development
 
 import android.os.Build
 import android.os.Bundle

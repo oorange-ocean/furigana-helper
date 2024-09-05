@@ -44,7 +44,7 @@ if (getRNMinorVersion() >= 75) {
   }
 }
 
-rootProject.name = 'MyApp'
+rootProject.name = 'furigana-helper'
 
 dependencyResolutionManagement {
   versionCatalogs {
