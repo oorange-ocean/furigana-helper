@@ -1,4 +1,4 @@
-package com.furiganahelper.development
+package com.myapp.staging
 
 import android.app.Application
 import android.content.res.Configuration
