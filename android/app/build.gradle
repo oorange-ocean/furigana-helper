@@ -140,6 +140,8 @@ android {
         }
     }
     packagingOptions {
+        pickFirst 'META-INF/CONTRIBUTORS.md'
+        pickFirst 'META-INF/LICENSE.md'
         jniLibs {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
@@ -192,6 +194,14 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+
+project(':react-native-japanese-text-analyzer') {
+    afterEvaluate {
+        android {
+            compileSdkVersion rootProject.ext.compileSdkVersion
+        }
     }
 }
 

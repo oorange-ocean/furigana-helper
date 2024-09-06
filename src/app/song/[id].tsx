@@ -1,11 +1,12 @@
 import { type Audio } from 'expo-av';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView } from 'react-native';
+import { tokenize } from 'react-native-japanese-text-analyzer';
 
-import { useSong } from '@/api'; // 我们稍后会创建这个 hook
-import { LyricLine } from '@/components/lyric-line'; // 我们稍后会创建这个组件
-import { Button,Text, View } from '@/ui';
+import { useSong } from '@/api';
+import { LyricLine } from '@/components/lyric-line';
+import { Button, Text, View } from '@/ui';
 
 export default function SongDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,19 +34,32 @@ export default function SongDetail() {
     }
   };
 
+  const testAnalyzer = async () => {
+    if (song && song.lyrics.length > 0) {
+      const firstLyric = song.lyrics[0].words.map(word => word.surface).join('');
+      try {
+        const result = await tokenize(firstLyric);
+        console.log('分析结果:', result);
+      } catch (error) {
+        console.error('分析错误:', error);
+      }
+    }
+  };
+
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return <Text>加载中...</Text>;
   }
 
   if (error || !song) {
-    return <Text>Error loading song</Text>;
+    return <Text>加载歌曲时出错</Text>;
   }
 
   return (
     <View className="flex-1 p-4">
       <Text className="text-2xl font-bold">{song.title}</Text>
       <Text className="mb-4 text-lg text-gray-600">{song.artist}</Text>
-      <Button label={isPlaying ? 'Pause' : 'Play'} onPress={playPause} />
+      <Button label={isPlaying ? '暂停' : '播放'} onPress={playPause} />
+      <Button label="测试分析器" onPress={testAnalyzer} />
       <ScrollView className="mt-4">
         {song.lyrics.map((lyric, index) => (
           <LyricLine 
