@@ -4,7 +4,6 @@ import type { Song } from '@/types/lyrics';
 
 // 模拟 API 调用
 const fetchSongs = async (): Promise<Song[]> => {
-  // 这里应该是实际的 API 调用
   return [
     {
       id: '1',
@@ -14,8 +13,11 @@ const fetchSongs = async (): Promise<Song[]> => {
       lyrics: [
         {
           timestamp: '00:00:10',
-          text: '桜の花びら',
-          ruby: 'さくらのはなびら',
+          words: [
+            { surface: '桜', reading: 'さくら', pos: '名詞', basic_form: '桜', start_time: 10.0, end_time: 10.5 },
+            { surface: 'の', reading: 'の', pos: '助詞', basic_form: 'の', start_time: 10.5, end_time: 10.7 },
+            { surface: '花びら', reading: 'はなびら', pos: '名詞', basic_form: '花びら', start_time: 10.7, end_time: 11.5 },
+          ],
           translations: {
             en: 'Cherry blossom petals',
             zh: '樱花花瓣',

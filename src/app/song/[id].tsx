@@ -53,6 +53,7 @@ export default function SongDetail() {
             lyric={lyric} 
             isActive={currentTime >= parseFloat(lyric.timestamp) && 
                       (index === song.lyrics.length - 1 || currentTime < parseFloat(song.lyrics[index + 1].timestamp))}
+            currentTime={currentTime}
           />
         ))}
       </ScrollView>

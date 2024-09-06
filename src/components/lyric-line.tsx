@@ -1,34 +1,41 @@
 import React from 'react';
-import { ReactFuri } from 'react-furi';
-import { View } from 'react-native';
+import { Text,View } from 'react-native';
 
 import type { Lyric } from '@/types/lyrics';
-import { Text } from '@/ui';
 
 type Props = {
   lyric: Lyric;
-  isActive: boolean;
+  isActive?: boolean;
+  currentTime: number;
 };
 
-export const LyricLine: React.FC<Props> = ({ lyric, isActive }) => {
+export const LyricLine: React.FC<Props> = ({ lyric, isActive, currentTime }) => {
   return (
-    <View className={`mb-2 ${isActive ? 'bg-yellow-100' : ''}`}>
-      <ReactFuri
-        word={lyric.text}
-        reading={lyric.ruby}
-        render={({ pairs }) => (
-          <Text className="text-lg">
-            {pairs.map(([furigana, text], index) => (
-              <Text key={index}>
-                <Text className="text-xs text-gray-500">{furigana}</Text>
-                <Text>{text}</Text>
-              </Text>
-            ))}
-          </Text>
-        )}
-      />
-      <Text className="text-sm text-gray-600">{lyric.translations.en}</Text>
-      <Text className="text-sm text-gray-600">{lyric.translations.zh}</Text>
+    <View style={{ opacity: isActive ? 1 : 0.6 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+        {lyric.words.map((word, index) => (
+          <View key={index} style={{ alignItems: 'center', marginRight: 2 }}>
+            <Text style={{ 
+              fontSize: 10, 
+              color: isActive ? 'gray' : 'lightgray',
+              fontWeight: word.start_time && word.end_time && 
+                currentTime >= word.start_time && currentTime < word.end_time ? 'bold' : 'normal'
+            }}>
+              {word.reading}
+            </Text>
+            <Text style={{ 
+              fontSize: 18,
+              color: isActive ? 'black' : 'gray',
+              fontWeight: word.start_time && word.end_time && 
+                currentTime >= word.start_time && currentTime < word.end_time ? 'bold' : 'normal'
+            }}>
+              {word.surface}
+            </Text>
+          </View>
+        ))}
+      </View>
+      <Text style={{ fontSize: 14, color: isActive ? 'gray' : 'lightgray' }}>{lyric.translations.en}</Text>
+      <Text style={{ fontSize: 14, color: isActive ? 'gray' : 'lightgray' }}>{lyric.translations.zh}</Text>
     </View>
   );
 };
