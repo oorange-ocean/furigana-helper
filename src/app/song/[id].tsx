@@ -1,27 +1,67 @@
-import { type Audio } from 'expo-av';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView } from 'react-native';
 
 import { useSong } from '@/api';
-import { analyzeJapaneseText } from '@/api/japanese-analyzer';
 import { LyricLine } from '@/components/lyric-line';
-import { Button, Text, View } from '@/ui';
+import { ActivityIndicator, Button, Text, View } from '@/ui';
 
 export default function SongDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: song, isLoading, error } = useSong(id);
-  const [sound] = useState<Audio.Sound | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadAudio = useCallback(async () => {
+    if (!song) {
+      console.error('无法加载音频：歌曲数据不存在');
+      return;
+    }
+
+    try {
+      let audioSource;
+      if (song.isLocalAudio) {
+        const fileInfo = await FileSystem.getInfoAsync(song.audioUri);
+        if (!fileInfo.exists) {
+          throw new Error(`本地音频文件不存在: ${song.audioUri}`);
+        }
+        audioSource = { uri: song.audioUri };
+      } else {
+        audioSource = { uri: song.audioUri };
+      }
+
+      const { sound: audioSound } = await Audio.Sound.createAsync(
+        audioSource,
+        { shouldPlay: false },
+        (status) => {
+          if (status.isLoaded) {
+            setCurrentTime(status.positionMillis / 1000);
+          }
+        }
+      );
+
+      setSound(audioSound);
+      setErrorMessage(null);
+    } catch (error) {
+      console.error('加载音频时出错:', error);
+      setErrorMessage('无法加载音频，请稍后重试');
+    }
+  }, [song]);
 
   useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
+    if (song) {
+      loadAudio();
+    }
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [loadAudio, song]);
 
   const playPause = async () => {
     if (sound) {
@@ -34,24 +74,8 @@ export default function SongDetail() {
     }
   };
 
-  const testAnalyzer = async () => {
-    if (song && song.lyrics.length > 0) {
-      const firstLyric = song.lyrics[0].words.map(word => word.surface).join('');
-      try {
-        const result = await analyzeJapaneseText(firstLyric);
-        console.log('分析结果:', result.map(token => ({
-          surface_form: token.surface_form,
-          reading: token.reading,
-          hiragana_reading: token.hiragana_reading
-        })));
-      } catch (error) {
-        console.error('分析错误:', error);
-      }
-    }
-  };
-
   if (isLoading) {
-    return <Text>加载中...</Text>;
+    return <ActivityIndicator />;
   }
 
   if (error || !song) {
@@ -62,8 +86,8 @@ export default function SongDetail() {
     <View className="flex-1 p-4">
       <Text className="text-2xl font-bold">{song.title}</Text>
       <Text className="mb-4 text-lg text-gray-600">{song.artist}</Text>
+      {errorMessage && <Text className="mb-2 text-red-500">{errorMessage}</Text>}
       <Button label={isPlaying ? '暂停' : '播放'} onPress={playPause} />
-      <Button label="测试分析器" onPress={testAnalyzer} />
       <ScrollView className="mt-4">
         {song.lyrics.map((lyric, index) => (
           <LyricLine 

@@ -20,6 +20,7 @@ export interface Song {
   id: string;
   title: string;
   artist: string;
-  audioUrl: string;
+  audioUri: string; // 可以是网络URL或本地文件URI
+  isLocalAudio: boolean; // 标识是否为本地音频
   lyrics: Lyric[];
 }
