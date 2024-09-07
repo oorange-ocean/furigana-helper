@@ -2,9 +2,9 @@ import { type Audio } from 'expo-av';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView } from 'react-native';
-import { tokenize } from 'react-native-japanese-text-analyzer';
 
 import { useSong } from '@/api';
+import { analyzeJapaneseText } from '@/api/japanese-analyzer';
 import { LyricLine } from '@/components/lyric-line';
 import { Button, Text, View } from '@/ui';
 
@@ -38,8 +38,12 @@ export default function SongDetail() {
     if (song && song.lyrics.length > 0) {
       const firstLyric = song.lyrics[0].words.map(word => word.surface).join('');
       try {
-        const result = await tokenize(firstLyric);
-        console.log('分析结果:', result);
+        const result = await analyzeJapaneseText(firstLyric);
+        console.log('分析结果:', result.map(token => ({
+          surface_form: token.surface_form,
+          reading: token.reading,
+          hiragana_reading: token.hiragana_reading
+        })));
       } catch (error) {
         console.error('分析错误:', error);
       }

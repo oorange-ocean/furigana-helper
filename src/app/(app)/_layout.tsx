@@ -3,6 +3,7 @@ import { Redirect, SplashScreen, Tabs } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 
 import { useAuth, useIsFirstTime } from '@/core';
+import { EditIcon } from '@/ui/icons';
 import {
   Feed as FeedIcon,
   Settings as SettingsIcon,
@@ -58,6 +59,14 @@ export default function TabLayout() {
           tabBarTestID: 'settings-tab',
         }}
       />
+      <Tabs.Screen
+        name="lyrics-editor"
+        options={{
+          title: '歌词编辑器',
+          tabBarIcon: ({ color }) => <EditIcon color={color} />,
+          tabBarTestID: 'lyrics-editor-tab',
+        }}
+/>
     </Tabs>
   );
 }
