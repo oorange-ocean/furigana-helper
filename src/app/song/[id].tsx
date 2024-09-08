@@ -82,6 +82,11 @@ export default function SongDetail() {
     return <Text>加载歌曲时出错</Text>;
   }
 
+  function timeToSeconds(time: string): number {
+    const [minutes, seconds] = time.split(':').map(parseFloat);
+    return minutes * 60 + seconds;
+  }
+  
   return (
     <View className="flex-1 p-4">
       <Text className="text-2xl font-bold">{song.title}</Text>
@@ -89,15 +94,30 @@ export default function SongDetail() {
       {errorMessage && <Text className="mb-2 text-red-500">{errorMessage}</Text>}
       <Button label={isPlaying ? '暂停' : '播放'} onPress={playPause} />
       <ScrollView className="mt-4">
-        {song.lyrics.map((lyric, index) => (
-          <LyricLine 
-            key={index} 
-            lyric={lyric} 
-            isActive={currentTime >= parseFloat(lyric.timestamp) && 
-                      (index === song.lyrics.length - 1 || currentTime < parseFloat(song.lyrics[index + 1].timestamp))}
-            currentTime={currentTime}
-          />
-        ))}
+        {song.lyrics.map((lyric, index) => {
+          const currentTimeSeconds = currentTime;
+          const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
+          const nextLyricTimeSeconds = index < song.lyrics.length - 1 ? timeToSeconds(song.lyrics[index + 1].timestamp) : Infinity;
+          
+          const isActive = currentTimeSeconds >= lyricTimeSeconds && 
+                           currentTimeSeconds < nextLyricTimeSeconds;
+          
+          // if (isActive) {
+          //   console.log(`当前活跃行: ${index + 1}`);
+          //   console.log(`  当前时间 (秒): ${currentTimeSeconds}`);
+          //   console.log(`  行时间戳 (秒): ${lyricTimeSeconds}`);
+          //   console.log(`  下一行时间戳 (秒): ${nextLyricTimeSeconds}`);
+          // }
+          
+          return (
+            <LyricLine 
+              key={index} 
+              lyric={lyric} 
+              isActive={isActive}
+              currentTime={currentTime}
+            />
+          );
+        })}
       </ScrollView>
     </View>
   );

@@ -21,7 +21,7 @@ export const LyricLine: React.FC<Props> = ({ lyric, isActive, currentTime }) => 
               fontWeight: word.start_time && word.end_time && 
                 currentTime >= word.start_time && currentTime < word.end_time ? 'bold' : 'normal'
             }}>
-              {word.reading}
+              {word.hiragana_reading}
             </Text>
             <Text style={{ 
               fontSize: 18,

@@ -5,8 +5,8 @@ export interface Word {
   basic_form: string; // 基本形
   start_time: number; // 开始时间
   end_time: number;   // 结束时间
+  hiragana_reading: string; // 平假名读音
 }
-
 export interface Lyric {
   timestamp: string;
   words: Word[];
@@ -14,13 +14,19 @@ export interface Lyric {
     en: string;
     zh: string;
   };
+  romaji?: string; // 添加罗马音字段
+  original: string; // 原始歌词文本
 }
 
 export interface Song {
   id: string;
   title: string;
   artist: string;
-  audioUri: string; // 可以是网络URL或本地文件URI
-  isLocalAudio: boolean; // 标识是否为本地音频
+  album?: string; // 添加专辑字段
+  audioUri: string;
+  isLocalAudio: boolean;
   lyrics: Lyric[];
+  metadata?: { // 添加元数据字段
+    [key: string]: string;
+  };
 }
