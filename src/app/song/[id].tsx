@@ -1,11 +1,12 @@
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef,useState } from 'react';
 import { ScrollView } from 'react-native';
 
 import { useSong } from '@/api';
 import { LyricLine } from '@/components/lyric-line';
+import { LyricLineMeasure } from '@/components/lyric-line-measure';
 import { ActivityIndicator, Button, Text, View } from '@/ui';
 
 export default function SongDetail() {
@@ -15,6 +16,33 @@ export default function SongDetail() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [scrollViewHeight, setScrollViewHeight] = useState(300);
+  const [lyricLineHeight, setLyricLineHeight] = useState(0);
+  const [isLyricHeightMeasured, setIsLyricHeightMeasured] = useState(false);
+
+  const handleLyricLineMeasure = (height: number) => {
+    setLyricLineHeight(height);
+    setIsLyricHeightMeasured(true);
+  };
+
+const scrollToActiveLyric = (index: number) => {
+  const scrollToY = Math.max(0, index * lyricLineHeight - scrollViewHeight / 2 + lyricLineHeight / 2);
+  scrollViewRef.current?.scrollTo({ y: scrollToY, animated: true });
+};
+  
+  useEffect(() => {
+    const activeLyricIndex = song?.lyrics.findIndex((lyric, index) => {
+      const currentTimeSeconds = currentTime;
+      const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
+      const nextLyricTimeSeconds = index < song.lyrics.length - 1 ? timeToSeconds(song.lyrics[index + 1].timestamp) : Infinity;
+      return currentTimeSeconds >= lyricTimeSeconds && currentTimeSeconds < nextLyricTimeSeconds;
+    });
+  
+    if (activeLyricIndex !== undefined && activeLyricIndex !== -1) {
+      scrollToActiveLyric(activeLyricIndex);
+    }
+  }, [currentTime, song]);
 
   const loadAudio = useCallback(async () => {
     if (!song) {
@@ -86,14 +114,26 @@ export default function SongDetail() {
     const [minutes, seconds] = time.split(':').map(parseFloat);
     return minutes * 60 + seconds;
   }
+
   
   return (
     <View className="flex-1 p-4">
+      {!isLyricHeightMeasured && (
+        <LyricLineMeasure onMeasure={handleLyricLineMeasure} />
+      )}
+      {isLyricHeightMeasured && (
+        <>
       <Text className="text-2xl font-bold">{song.title}</Text>
       <Text className="mb-4 text-lg text-gray-600">{song.artist}</Text>
       {errorMessage && <Text className="mb-2 text-red-500">{errorMessage}</Text>}
       <Button label={isPlaying ? '暂停' : '播放'} onPress={playPause} />
-      <ScrollView className="mt-4">
+      <ScrollView ref={scrollViewRef} 
+      className="mt-4"
+      onLayout={(event) => {
+        const {height} = event.nativeEvent.layout;
+        setScrollViewHeight(height);
+        console.log(height)
+      }}>
         {song.lyrics.map((lyric, index) => {
           const currentTimeSeconds = currentTime;
           const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
@@ -119,6 +159,8 @@ export default function SongDetail() {
           );
         })}
       </ScrollView>
+      </>
+      )}
     </View>
   );
 }
