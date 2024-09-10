@@ -1,40 +1,45 @@
+import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet,TouchableOpacity } from 'react-native';
+import { Alert, ScrollView, StyleSheet,TouchableOpacity } from 'react-native';
+import uuid from 'react-native-uuid';
 
 import { analyzeJapaneseText } from '@/api/japanese-analyzer';
-import type { Lyric } from '@/types/lyrics';
+import type { Lyric, Song } from '@/types/lyrics';
 import { Button, Text, View } from '@/ui';
-
 const POS_COLORS = {
-  介词: 'rgba(173, 216, 230, 0.5)', // 淡蓝色
-  动词: 'rgba(144, 238, 144, 0.5)', // 淡绿色
-  名词: 'rgba(255, 255, 224, 0.5)', // 淡黄色
-  副词: 'rgba(230, 230, 250, 0.5)', // 淡紫色
+  介词: 'rgba(70, 130, 180, 0.8)',  // 更深的钢蓝色
+  动词: 'rgba(50, 205, 50, 0.8)',   // 更深的酸橙绿
+  名词: 'rgba(255, 165, 0, 0.8)',   // 更深的橙色
+  副词: 'rgba(186, 85, 211, 0.8)',  // 更深的中等兰花紫
 };
 
 export default function LyricsPreview() {
   const router = useRouter();
-  const { songTitle, artist, lyrics } = useLocalSearchParams<{ songTitle: string; artist: string; lyrics: string }>();
-  const [analyzedLyrics, setAnalyzedLyrics] = useState<Lyric[]>([]);
+  const { songData } = useLocalSearchParams<{ songData: string }>();
+  const [song, _setSong] = useState<Partial<Song>>(JSON.parse(songData));
+  const [analyzedLyrics, setAnalyzedLyrics] = useState<Lyric[]>(song.lyrics || []);
 
   useEffect(() => {
     const analyze = async () => {
       try {
-        const lines = lyrics.split('\n').filter(line => line.trim() !== '');
-        const analyzedLines = await Promise.all(lines.map(line => analyzeJapaneseText(line)));
-        console.log(analyzedLines);
-        const newLyrics: Lyric[] = analyzedLines.map((line, index) => ({
-          timestamp: `00:00:${index * 5}`, // 临时时间戳
-          words: line.map(token => ({
-            surface: token.surface_form,
-            reading: token.reading,
-            pos: token.pos,
-            basic_form: token.basic_form,
-            start_time: 0, // 临时开始时间
-            end_time: 0, // 临时结束时间
-          })),
-          translations: { en: '', zh: '' }, // 临时翻译
+        const newLyrics = await Promise.all(song.lyrics!.map(async (lyric) => {
+          if (lyric.words.length === 0) {
+            const analyzedLine = await analyzeJapaneseText(lyric.original);
+            return {
+              ...lyric,
+              words: analyzedLine.map(token => ({
+                surface: token.surface_form,
+                reading: token.reading,
+                pos: token.pos,
+                basic_form: token.basic_form,
+                start_time: 0,
+                end_time: 0,
+                hiragana_reading: token.hiragana_reading,
+              })),
+            };
+          }
+          return lyric;
         }));
         setAnalyzedLyrics(newLyrics);
       } catch (error) {
@@ -42,12 +47,37 @@ export default function LyricsPreview() {
       }
     };
     analyze();
-  }, [lyrics]);
+  }, [song.lyrics]);
+
+  const handleSave = async () => {
+    const newSong: Song = {
+      id: uuid.v4().toString(),
+      title: song.title!,
+      artist: song.artist!,
+      audioUri: song.audioUri!,
+      isLocalAudio: song.isLocalAudio!,
+      lyrics: analyzedLyrics,
+    };
+  
+    try {
+      const songsDir = `${FileSystem.documentDirectory}songs/`;
+      const songFile = `${songsDir}${newSong.id}.json`;
+  
+      await FileSystem.makeDirectoryAsync(songsDir, { intermediates: true });
+      await FileSystem.writeAsStringAsync(songFile, JSON.stringify(newSong));
+  
+      console.log('Song saved successfully');
+      router.replace('/songs'); 
+    } catch (error) {
+      console.error('Error saving song:', error);
+      Alert.alert('错误', '保存歌曲时出错');
+    }
+  };
 
   const handleLinePress = (index: number) => {
     router.push({
       pathname: `/lyrics-editor/edit/[id]`,
-      params: { id: index.toString(), songTitle, artist, lyric: JSON.stringify(analyzedLyrics[index]) },
+      params: { id: index.toString(), songTitle: song.title, artist: song.artist, lyric: JSON.stringify(analyzedLyrics[index]) },
     });
   };
 
@@ -64,7 +94,7 @@ export default function LyricsPreview() {
     <ScrollView>
       <View className="p-4">
         <Text className="mb-4 text-2xl font-bold">歌词预览</Text>
-        <Text className="mb-2 text-lg">{songTitle} - {artist}</Text>
+        <Text className="mb-2 text-lg">{song.title} - {song.artist}</Text>
         {analyzedLyrics.map((lyric, index) => (
           <TouchableOpacity key={index} onPress={() => handleLinePress(index)}>
             <View style={styles.lineContainer}>
@@ -78,7 +108,7 @@ export default function LyricsPreview() {
             <Text style={styles.translation}>{lyric.translations.zh}</Text>
           </TouchableOpacity>
         ))}
-        <Button label="保存" onPress={() => {/* 保存逻辑 */}} />
+        <Button label="保存" onPress={handleSave} />
       </View>
     </ScrollView>
   );
