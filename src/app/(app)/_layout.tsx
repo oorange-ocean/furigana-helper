@@ -4,11 +4,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { useAuth, useIsFirstTime } from '@/core';
 import { EditIcon } from '@/ui/icons';
-import {
-  Feed as FeedIcon,
-  Settings as SettingsIcon,
-  Style as StyleIcon,
-} from '@/ui/icons';
+import { Feed as FeedIcon, Settings as SettingsIcon } from '@/ui/icons';
 
 export default function TabLayout() {
   const status = useAuth.use.status();
@@ -33,21 +29,20 @@ export default function TabLayout() {
   return (
     <Tabs>
       <Tabs.Screen
-      name="songs"
-      options={{
-        title: 'Songs',
-        tabBarIcon: ({ color }) => <FeedIcon color={color} />,
-        tabBarTestID: 'songs-tab',
-      }}
-    />
+        name="songs"
+        options={{
+          title: 'Songs',
+          tabBarIcon: ({ color }) => <FeedIcon color={color} />,
+          tabBarTestID: 'songs-tab',
+        }}
+      />
 
       <Tabs.Screen
-        name="style"
+        name="lyrics-editor"
         options={{
-          title: 'Style',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <StyleIcon color={color} />,
-          tabBarTestID: 'style-tab',
+          title: '歌词编辑器',
+          tabBarIcon: ({ color }) => <EditIcon color={color} />,
+          tabBarTestID: 'lyrics-editor-tab',
         }}
       />
       <Tabs.Screen
@@ -59,15 +54,6 @@ export default function TabLayout() {
           tabBarTestID: 'settings-tab',
         }}
       />
-      <Tabs.Screen
-        name="lyrics-editor"
-        options={{
-          title: '歌词编辑器',
-          tabBarIcon: ({ color }) => <EditIcon color={color} />,
-          tabBarTestID: 'lyrics-editor-tab',
-        }}
-/>
     </Tabs>
   );
 }
-
