@@ -48,7 +48,7 @@ export function parseLRC(lrcContent: string): Song {
             original: content.replace(/^[""]|[""]$/g, '').trim(),
           };
           lyrics.push(newLyric);
-          console.log('创建新的歌词对象:', newLyric);
+          // console.log('创建新的歌词对象:', newLyric);
         }
       }
     } else if (line.includes('::')) {
@@ -64,7 +64,7 @@ export function parseLRC(lrcContent: string): Song {
         // console.log('解析到带有假名和翻译的歌词:', { original, romaji, translation });
       }
     } else {
-      console.log('无法解析的行:', line);
+      console.error('无法解析的行:', line);
     }
   });
 
@@ -81,7 +81,7 @@ export function parseLRC(lrcContent: string): Song {
     metadata,
   };
 
-  console.log('生成的Song对象:', JSON.stringify(parsedSong, null, 2));
+  // console.log('生成的Song对象:', JSON.stringify(parsedSong, null, 2));
 
   return parsedSong;
 }

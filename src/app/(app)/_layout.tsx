@@ -29,9 +29,9 @@ export default function TabLayout() {
   return (
     <Tabs>
       <Tabs.Screen
-        name="songs"
+        name="index"
         options={{
-          title: 'Songs',
+          title: 'songs',
           tabBarIcon: ({ color }) => <FeedIcon color={color} />,
           tabBarTestID: 'songs-tab',
         }}

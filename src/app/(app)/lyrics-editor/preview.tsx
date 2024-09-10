@@ -67,7 +67,8 @@ export default function LyricsPreview() {
       await FileSystem.writeAsStringAsync(songFile, JSON.stringify(newSong));
   
       console.log('Song saved successfully');
-      router.replace('/songs'); 
+      Alert.alert('保存成功', '歌曲已成功保存');
+      router.replace('/lyrics-editor'); 
     } catch (error) {
       console.error('Error saving song:', error);
       Alert.alert('错误', '保存歌曲时出错');

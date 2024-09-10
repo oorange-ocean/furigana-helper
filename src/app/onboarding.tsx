@@ -15,23 +15,23 @@ export default function Onboarding() {
       </View>
       <View className="justify-end ">
         <Text className="my-3 text-center text-5xl font-bold">
-          Obytes Starter
+          Furigana Lyrics
         </Text>
         <Text className="mb-2 text-center text-lg text-gray-600">
-          The right way to build your mobile app
+          听歌学日语
         </Text>
 
         <Text className="my-1 pt-6 text-left text-lg">
-          🚀 Production-ready{' '}
+          🚀 日语语法分析功能，自动划分结构并添加假名
         </Text>
         <Text className="my-1 text-left text-lg">
-          🥷 Developer experience + Productivity
+          🥷 学习模式，针对每句歌词进行单词、语法的学习
         </Text>
         <Text className="my-1 text-left text-lg">
-          🧩 Minimal code and dependencies
+          🧩 苹果风格，简洁优雅
         </Text>
         <Text className="my-1 text-left text-lg">
-          💪 well maintained third-party libraries
+          💪 支持Anki同步，帮助你更好的记忆
         </Text>
       </View>
       <SafeAreaView className="mt-6">

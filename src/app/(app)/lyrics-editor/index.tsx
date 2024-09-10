@@ -41,14 +41,14 @@ export default function LyricsEditorHome() {
 
   const pickLRCFile = async () => {
     try {
-      console.log('开始选择LRC文件');
+      // console.log('开始选择LRC文件');
       const result = await DocumentPicker.getDocumentAsync({
         type: ['text/plain', 'application/x-lrc', '*/*'],
         copyToCacheDirectory: true,
       });
   
       if (result.canceled) {
-        console.log('用户取消了文件选择');
+        console.error('用户取消了文件选择');
         return;
       }
   
@@ -59,7 +59,7 @@ export default function LyricsEditorHome() {
       }
   
       const asset = result.assets[0];
-      console.log(`选择的文件: ${asset.name}, URI: ${asset.uri}`);
+      // console.log(`选择的文件: ${asset.name}, URI: ${asset.uri}`);
   
       if (!asset.name.toLowerCase().endsWith('.lrc')) {
         console.warn('选择的文件不是LRC文件');
@@ -90,17 +90,17 @@ export default function LyricsEditorHome() {
   const processLRCFile = async (asset: DocumentPicker.DocumentPickerAsset) => {
     try {
       const fileContent = await FileSystem.readAsStringAsync(asset.uri);
-      console.log('成功读取文件内容');
+      // console.log('成功读取文件内容');
   
       const parsedSong = parseLRC(fileContent);
-      console.log('成功解析LRC文件', { title: parsedSong.title, artist: parsedSong.artist});
+      // console.log('成功解析LRC文件', { title: parsedSong.title, artist: parsedSong.artist});
   
       // 设置状态
       parsedSong.title && setSongTitle(parsedSong.title);
       parsedSong.artist && setArtist(parsedSong.artist);
       parsedSong.lyrics && setLyrics(parsedSong.lyrics.map(l => l.original).join('\n'));
       setParsedLyrics(parsedSong.lyrics);
-      console.log('状态已更新');
+      // console.log('状态已更新');
       Alert.alert('成功', '已成功导入LRC文件');
     } catch (err) {
       console.error('解析LRC文件时出错:', err);
