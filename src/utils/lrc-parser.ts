@@ -1,6 +1,6 @@
 import type { Lyric, Song } from '@/types/lyrics';
 
-export function parseLRC(lrcContent: string): Song {
+export function parseLRC(lrcContent: string,song: Song): Song {
   console.log('开始解析LRC内容');
   const lines = lrcContent.split('\n');
   console.log(`LRC文件共有 ${lines.length} 行`);
@@ -71,12 +71,12 @@ export function parseLRC(lrcContent: string): Song {
   // console.log(`解析完成。元数据数量: ${Object.keys(metadata).length}, 歌词行数: ${lyrics.length}`);
 
   const parsedSong: Song = {
-    id: '', // 需要生成唯一ID
-    title: metadata.ti || '',
-    artist: metadata.ar || '',
-    album: metadata.al,
-    audioUri: '', // 需要设置音频URI
-    isLocalAudio: false, // 需要根据实际情况设置
+    ...song,
+    title: metadata.ti || song.title,
+    artist: metadata.ar || song.artist,
+    album: metadata.al || song.album,
+    audioUri: song.audioUri, // 需要设置音频URI
+    isLocalAudio: song.isLocalAudio, // 需要根据实际情况设置
     lyrics,
     metadata,
   };

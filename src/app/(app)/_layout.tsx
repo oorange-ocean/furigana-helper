@@ -34,6 +34,7 @@ export default function TabLayout() {
           title: 'songs',
           tabBarIcon: ({ color }) => <FeedIcon color={color} />,
           tabBarTestID: 'songs-tab',
+          headerShown: false,
         }}
       />
 
@@ -43,6 +44,7 @@ export default function TabLayout() {
           title: '歌词编辑器',
           tabBarIcon: ({ color }) => <EditIcon color={color} />,
           tabBarTestID: 'lyrics-editor-tab',
+          headerShown: false,
         }}
       />
       <Tabs.Screen

@@ -19,6 +19,7 @@ export interface Lyric {
 }
 
 export interface Song {
+  coverUri: string;
   id: string;
   title: string;
   artist: string;
@@ -29,4 +30,5 @@ export interface Song {
   metadata?: { // 添加元数据字段
     [key: string]: string;
   };
+  lyricsDelay: number;
 }

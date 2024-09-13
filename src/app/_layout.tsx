@@ -10,11 +10,21 @@ import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import TrackPlayer from 'react-native-track-player';
 
 import { APIProvider } from '@/api';
+import { playbackService } from '@/constants/playback-service';
 import { hydrateAuth, loadSelectedTheme } from '@/core';
 import { useThemeConfig } from '@/core/use-theme-config';
+import { useInitializePlayer } from '@/hooks/use-track-player';
 export { ErrorBoundary } from 'expo-router';
+
+try {
+  TrackPlayer.registerPlaybackService(() => playbackService);
+  console.log('TrackPlayer registered');
+} catch (error) {
+  console.log(error);
+}
 
 export const unstable_settings = {
   initialRouteName: '(app)',
@@ -27,6 +37,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const queryClient = React.useMemo(() => new QueryClient(), []);
+  useInitializePlayer();
   return (
     <Providers>
       <QueryClientProvider client={queryClient}>
@@ -34,6 +45,7 @@ export default function RootLayout() {
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="song/[id]" options={{ headerShown: false }} />
       </Stack>
       </QueryClientProvider>
     </Providers>

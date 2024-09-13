@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, TextInput } from 'react-native';
 
-import type { Lyric, Song } from '@/types/lyrics';
+import { DEFAULT_COVER_URL } from '@/constants/cover';
+import type { Song } from '@/types/lyrics';
+import type { Lyric } from '@/types/lyrics';
 import { Button, Text, View } from '@/ui';
 import { parseLRC } from '@/utils/lrc-parser';
 
@@ -16,7 +18,17 @@ export default function LyricsEditorHome() {
   const [audioUri, setAudioUri] = useState('');
   const [isLocalAudio, setIsLocalAudio] = useState(false);
   const [parsedLyrics, setParsedLyrics] = useState<Lyric[]>([]);
-
+  const [_coverUri, setCoverUri] = useState('');
+  let songData:Song = {
+    id: '',
+    title: '',
+    artist: '',
+    lyrics: [],
+    audioUri: '',
+    isLocalAudio: false,
+    coverUri: '',
+    lyricsDelay: 0,
+  };
   const pickAudio = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -92,7 +104,7 @@ export default function LyricsEditorHome() {
       const fileContent = await FileSystem.readAsStringAsync(asset.uri);
       // console.log('成功读取文件内容');
   
-      const parsedSong = parseLRC(fileContent);
+      const parsedSong = parseLRC(fileContent,songData);
       // console.log('成功解析LRC文件', { title: parsedSong.title, artist: parsedSong.artist});
   
       // 设置状态
@@ -117,7 +129,8 @@ export default function LyricsEditorHome() {
       Alert.alert('错误', '请填写所有必要信息');
       return;
     }
-    const songData: Partial<Song> = {
+    songData = {
+      id: '',
       title: songTitle,
       artist,
       lyrics: parsedLyrics || lyrics.split('\n').map(line => ({
@@ -127,12 +140,35 @@ export default function LyricsEditorHome() {
         original: line
       })),
       audioUri,
-      isLocalAudio
+      isLocalAudio,
+      coverUri: _coverUri || DEFAULT_COVER_URL,
+      lyricsDelay: 0,
     };
     router.push({
       pathname: '/lyrics-editor/preview',
       params: { songData: JSON.stringify(songData) },
     });
+  };
+
+  const pickCover = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'image/*',
+        copyToCacheDirectory: true,
+      });
+  
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const newUri = FileSystem.documentDirectory + asset.name;
+        await FileSystem.copyAsync({
+          from: asset.uri,
+          to: newUri,
+        });
+        setCoverUri(newUri);
+      }
+    } catch (err) {
+      console.error('Error picking cover image:', err);
+    }
   };
 
   return (
@@ -161,6 +197,7 @@ export default function LyricsEditorHome() {
         <Button label="选择音频文件" onPress={pickAudio} />
         {audioUri && <Text>已选择音频文件</Text>}
         <Button label="选择LRC文件" onPress={pickLRCFile} />
+        <Button label="选择封面图片" onPress={pickCover} />
         <Button label="分析" onPress={handleAnalyze} />
       </View>
     </ScrollView>

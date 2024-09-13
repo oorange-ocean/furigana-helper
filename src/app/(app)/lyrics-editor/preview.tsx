@@ -57,6 +57,8 @@ export default function LyricsPreview() {
       audioUri: song.audioUri!,
       isLocalAudio: song.isLocalAudio!,
       lyrics: analyzedLyrics,
+      coverUri: song.coverUri!,
+      lyricsDelay: song.lyricsDelay!,
     };
   
     try {
@@ -68,7 +70,7 @@ export default function LyricsPreview() {
   
       console.log('Song saved successfully');
       Alert.alert('保存成功', '歌曲已成功保存');
-      router.replace('/lyrics-editor'); 
+      router.replace('/'); 
     } catch (error) {
       console.error('Error saving song:', error);
       Alert.alert('错误', '保存歌曲时出错');
