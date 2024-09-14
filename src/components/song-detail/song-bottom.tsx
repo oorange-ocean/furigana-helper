@@ -3,22 +3,13 @@ import React from 'react';
 import { View } from '@/ui';
 
 import { PlayControl } from './play-control';
+import { SingleLineRepeat } from './single-line-repeat';
 
-interface SongHeaderProps {
-  isPlaying: boolean;
-  onPlayPause: () => void;
-}
-
-export function SongBottom({ 
-  isPlaying, 
-  onPlayPause,
-}: SongHeaderProps) {
+export function SongBottom() {
   return (
     <View>
-      <PlayControl 
-        isPlaying={isPlaying}
-        onPlayPause={onPlayPause}
-      />
+      <PlayControl />
+      <SingleLineRepeat />
     </View>
   );
 }

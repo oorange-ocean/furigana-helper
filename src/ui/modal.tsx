@@ -1,33 +1,3 @@
-/**
- * Modal
- * Dependencies:
- * - @gorhom/bottom-sheet.
- *
- * Props:
- * - All `BottomSheetModalProps` props.
- * - `title` (string | undefined): Optional title for the modal header.
- *
- * Usage Example:
- * import { Modal, useModal } from '@gorhom/bottom-sheet';
- *
- * function DisplayModal() {
- *   const { ref, present, dismiss } = useModal();
- *
- *   return (
- *     <View>
- *       <Modal
- *         snapPoints={['60%']} // optional
- *         title="Modal Title"
- *         ref={ref}
- *       >
- *         Modal Content
- *       </Modal>
- *     </View>
- *   );
- * }
- *
- */
-
 import type {
   BottomSheetBackdropProps,
   BottomSheetModalProps,

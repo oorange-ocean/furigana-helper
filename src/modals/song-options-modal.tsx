@@ -1,23 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { LyricLatencyControl } from '@/components/song-detail/lyric-latency-control';
-import { Modal, Text } from '@/ui';
+import { useSongStore } from '@/store/use-song-store';
+import { Modal, useModal } from '@/ui';
+import { Text } from '@/ui/text';
 
-interface SongOptionsModalProps {
-  lyricsDelay: number;
-  onLyricsDelayChange: (delay: number) => void;
-}
+export function SongOptionsModal() {
+  const { currentSong, isOptionsModalVisible, setIsOptionsModalVisible } = useSongStore();
+  const modal = useModal();
 
-export function SongOptionsModal({ lyricsDelay, onLyricsDelayChange }: SongOptionsModalProps) {
+  useEffect(() => {
+    if (isOptionsModalVisible) {
+      modal.present();
+    } else {
+      modal.dismiss();
+    }
+  }, [isOptionsModalVisible, modal]);
+
+  if (!currentSong) return null;
+
   return (
-    <Modal snapPoints={['50%']} title="歌曲选项">
+    <Modal 
+      ref={modal.ref}
+      snapPoints={['50%']} 
+      title="歌曲选项"
+      onDismiss={() => setIsOptionsModalVisible(false)}
+    >
       <View className="p-4">
         <Text className="mb-4 text-lg font-bold">歌词延迟调整</Text>
-        <LyricLatencyControl 
-          lyricsDelay={lyricsDelay} 
-          onLyricsDelayChange={onLyricsDelayChange} 
-        />
+        <LyricLatencyControl />
       </View>
     </Modal>
   );

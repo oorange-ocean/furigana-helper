@@ -5,6 +5,7 @@ import { Alert, ScrollView, StyleSheet,TouchableOpacity } from 'react-native';
 import uuid from 'react-native-uuid';
 
 import { analyzeJapaneseText } from '@/api/japanese-analyzer';
+import { useSongStore } from '@/store/use-song-store';
 import type { Lyric, Song } from '@/types/lyrics';
 import { Button, Text, View } from '@/ui';
 const POS_COLORS = {
@@ -50,6 +51,7 @@ export default function LyricsPreview() {
   }, [song.lyrics]);
 
   const handleSave = async () => {
+    const { addSong } = useSongStore.getState();
     const newSong: Song = {
       id: uuid.v4().toString(),
       title: song.title!,
@@ -59,6 +61,7 @@ export default function LyricsPreview() {
       lyrics: analyzedLyrics,
       coverUri: song.coverUri!,
       lyricsDelay: song.lyricsDelay!,
+      isLiked: song.isLiked!,
     };
   
     try {
@@ -67,7 +70,7 @@ export default function LyricsPreview() {
   
       await FileSystem.makeDirectoryAsync(songsDir, { intermediates: true });
       await FileSystem.writeAsStringAsync(songFile, JSON.stringify(newSong));
-  
+      addSong(newSong);
       console.log('Song saved successfully');
       Alert.alert('保存成功', '歌曲已成功保存');
       router.replace('/'); 

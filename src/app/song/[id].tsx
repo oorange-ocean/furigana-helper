@@ -1,54 +1,54 @@
 import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useSong } from '@/api';
 import { LyricsScrollView } from '@/components/song-detail/lyrics-scroll-view';
 import { SongBottom } from '@/components/song-detail/song-bottom';
 import { SongHeader } from '@/components/song-header';
-import { useSongAudio } from '@/hooks/use-song-audio';
+import { SongOptionsModal } from '@/modals/song-options-modal';
+import { useSongStore } from '@/store/use-song-store';
 import { ActivityIndicator, View } from '@/ui';
 import { Text } from '@/ui/text';
 
 export default function SongDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: song, isLoading, error } = useSong(id);
   const [isLyricHeightMeasured, setIsLyricHeightMeasured] = useState(false);
-  const { isPlaying, playPause, progress } = useSongAudio(song);
-  const [isLiked, setIsLiked] = useState(false);
+  const { currentSong, setCurrentSong, isPlaying,setIsPlaying, songList } = useSongStore();
+  const { isLoading, error } = useSong(id);
+
+  useEffect(() => {
+    if (id) {
+      const song = songList.find(s => s.id === id);
+      if (song) {
+        setCurrentSong(song);
+      }
+    }
+  }, [id, songList, setCurrentSong]);
+
+
+  useEffect(() => {
+    setIsPlaying(isPlaying);
+  }, [isPlaying, setIsPlaying]);
 
   if (isLoading) {
     return <ActivityIndicator />;
   }
 
-  if (error || !song) {
+  if (error || !currentSong) {
     return <Text>加载歌曲时出错</Text>;
   }
 
   return (
     <View className="flex-1">
-      <SongHeader 
-        cover={song.coverUri}
-        title={song.title}
-        artist={song.artist}
-        isLiked={isLiked}
-        onLikePress={() => setIsLiked(!isLiked)}
-        onMorePress={() => {/* 实现更多功能 */}}
-      />
+      <SongHeader />
       <LyricsScrollView
-        lyrics={song.lyrics}
-        progress={{
-          ...progress,
-          position: Math.max(0, progress.position - song.lyricsDelay)
-        }}
         isLyricHeightMeasured={isLyricHeightMeasured}
         setIsLyricHeightMeasured={setIsLyricHeightMeasured}
       />
       <View className="p-4">
-        <SongBottom 
-          isPlaying={isPlaying}
-          onPlayPause={playPause}
-        />
+        <SongBottom/>
       </View>
+      <SongOptionsModal />
     </View>
   );
 }

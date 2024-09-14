@@ -28,6 +28,7 @@ export default function LyricsEditorHome() {
     isLocalAudio: false,
     coverUri: '',
     lyricsDelay: 0,
+    isLiked: false,
   };
   const pickAudio = async () => {
     try {
@@ -143,6 +144,7 @@ export default function LyricsEditorHome() {
       isLocalAudio,
       coverUri: _coverUri || DEFAULT_COVER_URL,
       lyricsDelay: 0,
+      isLiked: false,
     };
     router.push({
       pathname: '/lyrics-editor/preview',

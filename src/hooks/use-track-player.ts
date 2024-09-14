@@ -16,6 +16,7 @@ export const useInitializePlayer = () => {
             Capability.Play,
             Capability.Pause,
           ],
+          progressUpdateEventInterval: 1,
         });
         console.log('Player setup complete');
       } catch (error) {

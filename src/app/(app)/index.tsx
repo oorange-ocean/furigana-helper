@@ -1,25 +1,46 @@
-import { Link } from 'expo-router';
-import React from 'react';
-import { FlatList } from 'react-native';
+import { Link, useFocusEffect } from 'expo-router';
+import React, { useCallback } from 'react';
+import { FlatList, View } from 'react-native';
 
-import { useSongs } from '@/api';
-import { ActivityIndicator, Pressable, Text, View } from '@/ui';
+import { useSongStore } from '@/store/use-song-store';
+import { ActivityIndicator, Pressable, Text } from '@/ui';
 
 export default function SongsList() {
-  const { data: songs, isLoading, error } = useSongs();
+  const { songList, loadSongList } = useSongStore();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadSongs = async () => {
+        try {
+          setIsLoading(true);
+          setError(null);
+          await loadSongList();
+        } catch (err) {
+          console.error('加载歌曲时出错:', err);
+          setError('加载歌曲时出错');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadSongs();
+    }, [loadSongList])
+  );
 
   if (isLoading) {
     return <ActivityIndicator />;
   }
 
   if (error) {
-    return <Text>加载歌曲时出错</Text>;
+    return <Text>{error}</Text>;
   }
 
   return (
     <View className="flex-1">
       <FlatList
-        data={songs}
+        data={songList}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Link href={`/song/${item.id}`} asChild>

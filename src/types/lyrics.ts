@@ -31,4 +31,5 @@ export interface Song {
     [key: string]: string;
   };
   lyricsDelay: number;
+  isLiked: boolean;
 }

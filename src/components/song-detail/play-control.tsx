@@ -1,27 +1,24 @@
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 
+import { useSongStore } from '@/store/use-song-store';
 import { Pause,Play } from '@/ui/icons';
-
 interface PlayControlProps {
-  isPlaying: boolean;
-  onPlayPause: () => void;
   size?: number;
   color?: string;
   backgroundColor?: string;
 }
 
 export function PlayControl({ 
-  isPlaying, 
-  onPlayPause, 
   size = 64, 
   color = '#FFFFFF', 
   backgroundColor = '#4F46E5' // 假设这是你的主题主色
 }: PlayControlProps) {
+  const { playPause, isPlaying } = useSongStore();
   return (
     <View className="mb-4 items-center">
       <TouchableOpacity
-        onPress={onPlayPause}
+        onPress={playPause}
         style={{
           width: size,
           height: size,
