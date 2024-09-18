@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet,TouchableOpacity } from 'react-native';
 import uuid from 'react-native-uuid';
+import wanakana from 'wanakana';
 
 import { analyzeJapaneseText } from '@/api/japanese-analyzer';
 import { useSongStore } from '@/store/use-song-store';
@@ -37,6 +38,7 @@ export default function LyricsPreview() {
                 start_time: 0,
                 end_time: 0,
                 hiragana_reading: token.hiragana_reading,
+                rubies: token.rubies,
               })),
             };
           }
@@ -96,6 +98,11 @@ export default function LyricsPreview() {
     
     return { borderBottomWidth: 2, borderBottomColor: color };
   };
+  const shouldShowReading = (rb: string, rt: string) => {
+    if (rt.replace(/\*/g, '') === '') return false; // 忽略只包含 * 的读音
+    return wanakana.toHiragana(rb) !== wanakana.toHiragana(rt);
+  };
+
   return (
     <ScrollView>
       <View className="p-4">
@@ -106,8 +113,16 @@ export default function LyricsPreview() {
             <View style={styles.lineContainer}>
               {lyric.words.map((word, wordIndex) => (
                 <View key={wordIndex} style={styles.wordContainer}>
-                  <Text style={styles.reading}>{word.reading}</Text>
-                  <Text style={[styles.surface, getWordStyle(word.pos)]}>{word.surface}</Text>
+                  {word.rubies.map((ruby, rubyIndex) => (
+                    <View key={rubyIndex} style={styles.rubyContainer}>
+                      <Text style={styles.reading}>
+                        {shouldShowReading(ruby.rb, ruby.rt) ? wanakana.toHiragana(ruby.rt) : ' '}
+                      </Text>
+                      <Text style={[styles.surface, getWordStyle(word.pos)]}>
+                        {ruby.rb}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
               ))}
             </View>
@@ -127,17 +142,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   wordContainer: {
-    alignItems: 'center',
+    flexDirection: 'row',
     marginRight: 4,
+  },
+  rubyContainer: {
+    alignItems: 'center',
   },
   reading: {
     fontSize: 10,
     color: 'gray',
+    height: 14, // 设置一个固定高度
+    lineHeight: 14,
   },
   surface: {
     fontSize: 18,
     color: 'black',
-    paddingBottom: 2, // 添加一些底部内边距，使边框更明显
   },
   translation: {
     fontSize: 14,

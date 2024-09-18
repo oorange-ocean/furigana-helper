@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect,useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import TrackPlayer, { useProgress } from 'react-native-track-player';
 
 import { useSongStore } from '@/store/use-song-store';
-import { Text } from '@/ui';
-import { LineRepeat } from '@/ui/icons';
+import { LineRepeat, NextLine, PreviousLine } from '@/ui/icons';
 import { timeToSeconds } from '@/utils/time-utils';
 
 const log = (message: string, ...args: any[]) => {
@@ -62,6 +61,53 @@ export function SingleLineRepeat() {
     setIsRepeatActive(!isRepeatActive);
   }, [isRepeatActive, findActiveLyric]);
 
+  const updateRepeatTimes = useCallback((startIndex: number) => {
+    if (currentSong) {
+      const startTime = timeToSeconds(currentSong.lyrics[startIndex].timestamp) + (currentSong.lyricsDelay || 0);
+      const endTime = startIndex < currentSong.lyrics.length - 1
+        ? timeToSeconds(currentSong.lyrics[startIndex + 1].timestamp) + (currentSong.lyricsDelay || 0)
+        : progress.duration;
+      
+      setRepeatStartTime(startTime);
+      setRepeatEndTime(endTime);
+      log('Updated repeat times:', startTime, '-', endTime);
+    }
+  }, [currentSong, progress.duration]);
+
+  const goToPreviousLine = useCallback(() => {
+    if (currentSong) {
+      const currentTime = progress.position - (currentSong.lyricsDelay || 0);
+      const previousLyricIndex = currentSong.lyrics.findIndex((lyric) => {
+        const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
+        return lyricTimeSeconds > currentTime;
+      }) - 1;
+
+      if (previousLyricIndex >= 0) {
+        log('Previous lyric index:', previousLyricIndex);
+        const previousLyricTime = timeToSeconds(currentSong.lyrics[previousLyricIndex].timestamp);
+        TrackPlayer.seekTo(previousLyricTime + (currentSong.lyricsDelay || 0));
+        updateRepeatTimes(previousLyricIndex);
+      }
+    }
+  }, [currentSong, progress.position, updateRepeatTimes]);
+
+  const goToNextLine = useCallback(() => {
+    if (currentSong) {
+      const currentTime = progress.position - (currentSong.lyricsDelay || 0);
+      const nextLyricIndex = currentSong.lyrics.findIndex(lyric => {
+        const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
+        return lyricTimeSeconds > currentTime;
+      });
+
+      if (nextLyricIndex !== -1 && nextLyricIndex < currentSong.lyrics.length) {
+        log('Next lyric index:', nextLyricIndex);
+        const nextLyricTime = timeToSeconds(currentSong.lyrics[nextLyricIndex].timestamp);
+        TrackPlayer.seekTo(nextLyricTime + (currentSong.lyricsDelay || 0));
+        updateRepeatTimes(nextLyricIndex);
+      }
+    }
+  }, [currentSong, progress.position, updateRepeatTimes]);
+
   useEffect(() => {
     if (isRepeatActive && repeatStartTime !== null && repeatEndTime !== null) {
       log('Current position:', progress.position, 'Repeat range:', repeatStartTime, '-', repeatEndTime);
@@ -73,9 +119,16 @@ export function SingleLineRepeat() {
   }, [isRepeatActive, repeatStartTime, repeatEndTime, progress.position]);
 
   return (
-    <TouchableOpacity onPress={toggleRepeat}>
-      <LineRepeat color={isRepeatActive ? '#007AFF' : '#000000'} />
-      <Text>{isRepeatActive ? '单句循环开启' : '单句循环关闭'}</Text>
-    </TouchableOpacity>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
+      <TouchableOpacity onPress={goToPreviousLine}>
+        <PreviousLine color="#000000" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={toggleRepeat}>
+        <LineRepeat color={isRepeatActive ? '#007AFF' : '#000000'} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={goToNextLine}>
+        <NextLine color="#000000" />
+      </TouchableOpacity>
+    </View>
   );
 }

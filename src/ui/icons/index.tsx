@@ -9,13 +9,14 @@ export * from './language';
 export * from './line-repeat';
 export * from './lyric-latency';
 export * from './more-vertical';
+export * from './next-line';
 export * from './pause';
 export * from './play';
+export * from './previous-line';
 export * from './rate';
 export * from './settings';
 export * from './share';
 export * from './style';
 export * from './support';
 export * from './website';
-
 
