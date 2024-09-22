@@ -1,12 +1,11 @@
-import * as React from 'react';
-import type { SvgProps } from 'react-native-svg';
-import Svg, { Path } from 'react-native-svg';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React from 'react';
 
-export const Play = (props: SvgProps) => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>
-    <Path
-      d="M8 5.14v14.72a1 1 0 0 0 1.5.86l11-7.36a1 1 0 0 0 0-1.72l-11-7.36a1 1 0 0 0-1.5.86z"
-      fill="currentColor"
-    />
-  </Svg>
+interface PlayProps {
+  size?: number;
+  color?: string;
+}
+
+export const Play: React.FC<PlayProps> = ({ size = 24, color = 'currentColor' }) => (
+  <MaterialCommunityIcons name="play" size={size} color={color} />
 );

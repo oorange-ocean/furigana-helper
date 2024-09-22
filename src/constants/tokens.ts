@@ -1,8 +1,9 @@
 export const colors = {
-	primary: '#fc3c44',
+	primary: '#4F46E5',
+	secondary: '#007AFF',
 	background: '#000',
 	text: '#fff',
-	textMuted: '#9ca3af',
+	textMuted: '#6B7280',
 	icon: '#fff',
 	maximumTrackTintColor: 'rgba(255,255,255,0.4)',
 	minimumTrackTintColor: 'rgba(255,255,255,0.6)',

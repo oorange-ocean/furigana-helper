@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system';
 import TrackPlayer from 'react-native-track-player';
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow'
 
 import type { Song } from '@/types/lyrics';
 
@@ -21,6 +22,7 @@ interface SongState {
   loadSongList: () => Promise<void>;
   playPause: () => Promise<void>;
   loadAudio: (song: Song) => Promise<void>;
+  updateCurrentSong: (updatedSong: Song) => void;
 }
 
 const SONG_LIST_FILE = `${FileSystem.documentDirectory}songList.json`;
@@ -68,7 +70,12 @@ export const useSongStore = create<SongState>((set, get) => ({
       });
     }
   },
-  setIsOptionsModalVisible: (isVisible) => set({ isOptionsModalVisible: isVisible }),
+  setIsOptionsModalVisible: (isVisible) => {
+    console.log('setIsOptionsModalVisible 开始执行');
+    const startTime = performance.now();
+    set({ isOptionsModalVisible: isVisible });
+    console.log(`setIsOptionsModalVisible 执行完成，耗时: ${performance.now() - startTime} ms`);
+  },
   loadSongList: async () => {
     try {
       const fileContent = await FileSystem.readAsStringAsync(SONG_LIST_FILE);
@@ -106,7 +113,7 @@ export const useSongStore = create<SongState>((set, get) => ({
       });
 
       await TrackPlayer.updateOptions({
-        progressUpdateEventInterval: 500,
+        progressUpdateEventInterval: 100,
       });
       set({ errorMessage: null });
     } catch (error) {
@@ -114,7 +121,63 @@ export const useSongStore = create<SongState>((set, get) => ({
       set({ errorMessage: '无法加载音频，请稍后重试' });
     }
   },
+  updateCurrentSong: async (updatedSong: Song) => {
+    const updatedSongList = get().songList.map(song => 
+      song.id === updatedSong.id ? updatedSong : song
+    );
+    await saveSongList(updatedSongList);
+    set({
+      currentSong: updatedSong,
+      songList: updatedSongList,
+    });
+  },
 }));
+
+export const useCurrentSong = () => useSongStore(state => state.currentSong);
+export const useIsPlaying = () => useSongStore(state => state.isPlaying);
+export const useIsLiked = () => useSongStore(state => state.isLiked);
+export const useIsOptionsModalVisible = () => useSongStore(state => state.isOptionsModalVisible);
+export const useSongList = () => useSongStore(useShallow(state => state.songList));
+export const useErrorMessage = () => useSongStore(state => state.errorMessage);
+
+// 单独的动作 hooks
+export const useAddSong = () => useSongStore(state => state.addSong);
+export const useSetSongList = () => useSongStore(state => state.setSongList);
+export const useSetCurrentSong = () => useSongStore(state => state.setCurrentSong);
+export const useSetIsPlaying = () => useSongStore(state => state.setIsPlaying);
+export const useSetIsLiked = () => useSongStore(state => state.setIsLiked);
+export const useUpdateLyricsDelay = () => useSongStore(state => state.updateLyricsDelay);
+export const useSetIsOptionsModalVisible = () => useSongStore(state => state.setIsOptionsModalVisible);
+export const useLoadSongList = () => useSongStore(state => state.loadSongList);
+export const usePlayPause = () => useSongStore(state => state.playPause);
+export const useLoadAudio = () => useSongStore(state => state.loadAudio);
+export const useUpdateCurrentSong = () => useSongStore(state => state.updateCurrentSong);
+
+export const useSongActions = () => useSongStore(
+  useShallow(state => ({
+    addSong: state.addSong,
+    setSongList: state.setSongList,
+    setCurrentSong: state.setCurrentSong,
+    setIsPlaying: state.setIsPlaying,
+    setIsLiked: state.setIsLiked,
+    updateLyricsDelay: state.updateLyricsDelay,
+    setIsOptionsModalVisible: state.setIsOptionsModalVisible,
+    loadSongList: state.loadSongList,
+    playPause: state.playPause,
+    loadAudio: state.loadAudio,
+    updateCurrentSong: state.updateCurrentSong,
+  }))
+);
+
+// 如果需要多个动作，可以使用 shallow 比较
+export const useSongListActions = () => useSongStore(
+  useShallow(
+  state => ({
+    loadSongList: state.loadSongList,
+    setSongList: state.setSongList,
+  })
+)
+);
 
 // 在应用启动时加载歌曲列表
 useSongStore.getState().loadSongList();

@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect,useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import TrackPlayer, { useProgress } from 'react-native-track-player';
 
-import { useSongStore } from '@/store/use-song-store';
+import { useCurrentSong } from '@/store/use-song-store';
 import { LineRepeat, NextLine, PreviousLine } from '@/ui/icons';
 import { timeToSeconds } from '@/utils/time-utils';
 
@@ -10,11 +10,16 @@ const log = (message: string, ...args: any[]) => {
   console.log(`[SingleLineRepeat] ${message}`, ...args);
 };
 
-export function SingleLineRepeat() {
+interface SingleLineRepeatProps {   
+  size?: number;
+  color?: string;
+}
+
+export function SingleLineRepeat({ size = 24, color = '#000000' }: SingleLineRepeatProps) {
   const [isRepeatActive, setIsRepeatActive] = useState(false);
   const [repeatStartTime, setRepeatStartTime] = useState<number | null>(null);
   const [repeatEndTime, setRepeatEndTime] = useState<number | null>(null);
-  const { currentSong } = useSongStore();
+  const currentSong = useCurrentSong();
   const progress = useProgress();
 
   const findActiveLyric = useCallback(() => {
@@ -118,16 +123,22 @@ export function SingleLineRepeat() {
     }
   }, [isRepeatActive, repeatStartTime, repeatEndTime, progress.position]);
 
+  const repeatButtonColor = useMemo(() => isRepeatActive ? '#007AFF' : color, [isRepeatActive, color]);
+
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <TouchableOpacity onPress={goToPreviousLine}>
-        <PreviousLine color="#000000" />
+        <PreviousLine width={size} height={size} color={color} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={toggleRepeat}>
-        <LineRepeat color={isRepeatActive ? '#007AFF' : '#000000'} />
+      <TouchableOpacity onPress={toggleRepeat} style={{ marginHorizontal: 10 }}>
+        <LineRepeat 
+          width={size} 
+          height={size} 
+          color={repeatButtonColor} 
+        />
       </TouchableOpacity>
       <TouchableOpacity onPress={goToNextLine}>
-        <NextLine color="#000000" />
+        <NextLine width={size} height={size} color={color} />
       </TouchableOpacity>
     </View>
   );

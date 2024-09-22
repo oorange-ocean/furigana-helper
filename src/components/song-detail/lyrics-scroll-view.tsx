@@ -1,41 +1,42 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { ScrollView, View } from 'react-native';
 import { useProgress } from 'react-native-track-player';
 
 import { LyricLine } from '@/components/lyric-line';
 import { LyricLineMeasure } from '@/components/lyric-line-measure';
-import { useSongStore } from '@/store/use-song-store';
+import { useCurrentSong } from '@/store/use-song-store';
 import { timeToSeconds } from '@/utils/time-utils';
 
 interface LyricsScrollViewProps {
   isLyricHeightMeasured: boolean;
   setIsLyricHeightMeasured: (value: boolean) => void;
+  isAutoScrollEnabled: boolean;
 }
 
 export function LyricsScrollView({ 
   isLyricHeightMeasured, 
-  setIsLyricHeightMeasured 
+  setIsLyricHeightMeasured,
+  isAutoScrollEnabled
 }: LyricsScrollViewProps) {
   const scrollViewRef = useRef<ScrollView>(null);
-  const [lyricLineHeight, setLyricLineHeight] = useState(0);
-  const currentSong = useSongStore(state => state.currentSong);
+  const lyricLineHeightRef = useRef(0);
+  const currentSong = useCurrentSong();
   const progress = useProgress();
 
-  const handleLyricLineMeasure = (height: number) => {
-    setLyricLineHeight(height);
+  const handleLyricLineMeasure = useCallback((height: number) => {
+    lyricLineHeightRef.current = height;
     setIsLyricHeightMeasured(true);
-  };
+  }, [setIsLyricHeightMeasured]);
 
   const scrollToActiveLyric = useCallback((index: number) => {
-    if (scrollViewRef.current && lyricLineHeight > 0) {
-      const extraSpace = 20;
-      const scrollToY = Math.max(0, index * lyricLineHeight - extraSpace);
+    if (scrollViewRef.current && lyricLineHeightRef.current > 0 && isAutoScrollEnabled) {
+      const scrollToY = Math.max(0, (index-1) * lyricLineHeightRef.current);
       scrollViewRef.current.scrollTo({ y: scrollToY, animated: true });
     }
-  }, [lyricLineHeight]);
+  }, [isAutoScrollEnabled]);
 
   useEffect(() => {
-    if (currentSong) {
+    if (currentSong && isAutoScrollEnabled) {
       const adjustedPosition = progress.position - (currentSong.lyricsDelay || 0);
       const activeLyricIndex = currentSong.lyrics.findIndex((lyric, index) => {
         const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
@@ -49,7 +50,34 @@ export function LyricsScrollView({
         scrollToActiveLyric(activeLyricIndex);
       }
     }
-  }, [progress.position, currentSong, scrollToActiveLyric]);
+  }, [progress.position, currentSong, scrollToActiveLyric, isAutoScrollEnabled]);
+
+  const lyricLines = useMemo(() => {
+    if (!currentSong) return null;
+
+    return currentSong.lyrics.map((lyric, index) => {
+      let isActive = false;
+      if (isAutoScrollEnabled) {
+        const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
+        const nextLyricTimeSeconds = index < currentSong.lyrics.length - 1 
+          ? timeToSeconds(currentSong.lyrics[index + 1].timestamp) 
+          : Infinity;
+        
+        const adjustedPosition = progress.position - (currentSong.lyricsDelay || 0);
+        isActive = adjustedPosition >= lyricTimeSeconds && 
+                   adjustedPosition < nextLyricTimeSeconds;
+      }
+      
+      return (
+        <LyricLine 
+          key={index}
+          lyric={lyric} 
+          isActive={isActive}
+          currentTime={progress.position - (currentSong.lyricsDelay || 0)}
+        />
+      );
+    });
+  }, [currentSong, isAutoScrollEnabled, progress.position]);
 
   if (!isLyricHeightMeasured) {
     return <LyricLineMeasure onMeasure={handleLyricLineMeasure} />;
@@ -61,26 +89,10 @@ export function LyricsScrollView({
     <ScrollView 
       ref={scrollViewRef} 
       className="mt-4 px-4"
+      scrollEnabled={!isAutoScrollEnabled}
     >
-      {currentSong.lyrics.map((lyric, index) => {
-        const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
-        const nextLyricTimeSeconds = index < currentSong.lyrics.length - 1 
-          ? timeToSeconds(currentSong.lyrics[index + 1].timestamp) 
-          : Infinity;
-        
-        const adjustedPosition = progress.position - (currentSong.lyricsDelay || 0);
-        const isActive = adjustedPosition >= lyricTimeSeconds && 
-                         adjustedPosition < nextLyricTimeSeconds;
-        
-        return (
-          <LyricLine 
-            key={index}
-            lyric={lyric} 
-            isActive={isActive}
-            currentTime={adjustedPosition}
-          />
-        );
-      })}
+      {lyricLines}
+      <View style={{ height: lyricLineHeightRef.current * 5 }} />
     </ScrollView>
   );
 }

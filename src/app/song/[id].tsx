@@ -6,15 +6,31 @@ import { LyricsScrollView } from '@/components/song-detail/lyrics-scroll-view';
 import { SongBottom } from '@/components/song-detail/song-bottom';
 import { SongHeader } from '@/components/song-header';
 import { SongOptionsModal } from '@/modals/song-options-modal';
-import { useSongStore } from '@/store/use-song-store';
+import {
+  useCurrentSong,
+  useIsPlaying,
+  useSetCurrentSong,
+  useSetIsPlaying,
+  useSongList} from '@/store/use-song-store';
 import { ActivityIndicator, View } from '@/ui';
 import { Text } from '@/ui/text';
 
 export default function SongDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isLyricHeightMeasured, setIsLyricHeightMeasured] = useState(false);
-  const { currentSong, setCurrentSong, isPlaying,setIsPlaying, songList } = useSongStore();
+  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(false);
+
+  const currentSong = useCurrentSong();
+  const isPlaying = useIsPlaying();
+  const songList = useSongList();
+  const setCurrentSong = useSetCurrentSong();
+  const setIsPlaying = useSetIsPlaying();
+
   const { isLoading, error } = useSong(id);
+
+  const toggleAutoScroll = () => {
+    setIsAutoScrollEnabled(!isAutoScrollEnabled);
+  };
 
   useEffect(() => {
     if (id) {
@@ -24,7 +40,6 @@ export default function SongDetail() {
       }
     }
   }, [id, songList, setCurrentSong]);
-
 
   useEffect(() => {
     setIsPlaying(isPlaying);
@@ -44,9 +59,13 @@ export default function SongDetail() {
       <LyricsScrollView
         isLyricHeightMeasured={isLyricHeightMeasured}
         setIsLyricHeightMeasured={setIsLyricHeightMeasured}
+        isAutoScrollEnabled={isAutoScrollEnabled}
       />
       <View className="p-4">
-        <SongBottom/>
+        <SongBottom
+          isAutoScrollEnabled={isAutoScrollEnabled}
+          toggleAutoScroll={toggleAutoScroll}
+        />
       </View>
       <SongOptionsModal />
     </View>

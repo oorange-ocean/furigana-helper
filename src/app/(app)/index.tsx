@@ -2,11 +2,12 @@ import { Link, useFocusEffect } from 'expo-router';
 import React, { useCallback } from 'react';
 import { FlatList, View } from 'react-native';
 
-import { useSongStore } from '@/store/use-song-store';
+import { useLoadSongList,useSongList } from '@/store/use-song-store';
 import { ActivityIndicator, Pressable, Text } from '@/ui';
 
 export default function SongsList() {
-  const { songList, loadSongList } = useSongStore();
+  const songList = useSongList();
+  const loadSongList = useLoadSongList();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 

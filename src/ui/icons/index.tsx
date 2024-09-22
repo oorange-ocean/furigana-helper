@@ -11,6 +11,7 @@ export * from './lyric-latency';
 export * from './more-vertical';
 export * from './next-line';
 export * from './pause';
+export * from './pin';
 export * from './play';
 export * from './previous-line';
 export * from './rate';

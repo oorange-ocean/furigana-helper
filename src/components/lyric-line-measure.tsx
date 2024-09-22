@@ -22,14 +22,23 @@ export const LyricLineMeasure: React.FC<Props> = ({ onMeasure }) => {
   // 使用一个样本歌词进行测量
   const sampleLyric = {
     timestamp: '00:00:00',
-    words: [{ surface: '样本歌词', hiragana_reading: 'さんぷるかし', reading: 'さんぷるかし', pos: '名詞', basic_form: '样本歌词', start_time: 0, end_time: 0 }],
+    words: [{
+      surface: '样本歌词',
+      reading: 'サンプルカシ',
+      pos: '名詞',
+      basic_form: '样本歌词',
+      start_time: 0,
+      end_time: 0,
+      hiragana_reading: 'さんぷるかし',
+      rubies: [
+        { rb: '样', rt: 'サン' },
+        { rb: '本', rt: 'プル' },
+        { rb: '歌', rt: 'カ' },
+        { rb: '词', rt: 'シ' }
+      ]
+    }],
     translations: { en: 'Sample lyric', zh: '样本歌词' },
     original: '样本歌词',
-    reading: 'さんぷるかし',
-    pos: '名詞',
-    basic_form: '样本歌词',
-    start_time: 0,
-    end_time: 0,
   };
 
   return (
