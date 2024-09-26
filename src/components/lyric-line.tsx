@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Linking,StyleSheet, Text,TouchableOpacity,View } from 'react-native';
 import * as wanakana from 'wanakana';
 
@@ -17,7 +17,7 @@ const POS_COLORS = {
   副詞: 'rgba(186, 85, 211, 0.8)',  // 副词
 };
 
-export const LyricLine: React.FC<Props> = ({ lyric, isActive, currentTime }) => {
+ const LyricLine: React.FC<Props> = memo(({ lyric, isActive, currentTime }) => {
   const shouldShowReading = (rb: string, rt: string) => {
     if (rt.replace(/\*/g, '') === '') return false; // 忽略只包含 * 的读音
     return wanakana.toHiragana(rb) !== wanakana.toHiragana(rt);
@@ -70,8 +70,8 @@ export const LyricLine: React.FC<Props> = ({ lyric, isActive, currentTime }) => 
       <Text style={styles.translation}>{lyric.translations.zh}</Text>
     </View>
   );
-};
-
+});
+export default LyricLine;
 const styles = StyleSheet.create({
   lineContainer: {
     marginBottom: 8,

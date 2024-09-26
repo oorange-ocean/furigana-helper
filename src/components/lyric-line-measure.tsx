@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 
-import { LyricLine } from './lyric-line';
+import LyricLine from './lyric-line';
 
 type Props = {
   onMeasure: (height: number) => void;

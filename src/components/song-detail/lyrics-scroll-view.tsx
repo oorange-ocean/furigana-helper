@@ -1,27 +1,59 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { ScrollView, View } from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { FlatList } from 'react-native';
 import { useProgress } from 'react-native-track-player';
 
-import { LyricLine } from '@/components/lyric-line';
-// import { useLyricHeight } from '@/hooks/use-lyric-height';
-import { type Song } from '@/types/lyrics';
+import LyricLine from '@/components/lyric-line';
+import { type Lyric,type Song } from '@/types/lyrics';
 import { timeToSeconds } from '@/utils/time-utils';
+
 interface LyricsScrollViewProps {
   isAutoScrollEnabled: boolean;
   song: Song;
 }
 
+const ITEM_HEIGHT = 79.63636016845703;
+
+const LyricItem = React.memo(({ item, currentTime, isActive }: 
+  { item: Lyric; currentTime: number; isActive: boolean }) => (
+  <LyricLine 
+    lyric={item} 
+    isActive={isActive}
+    currentTime={currentTime}
+  />
+));
+
 export function LyricsScrollView({ isAutoScrollEnabled, song }: LyricsScrollViewProps) {
-  const scrollViewRef = useRef<ScrollView>(null);
+  const flatListRef = useRef<FlatList<Lyric>>(null);
   const progress = useProgress();
-  const lyricLineHeight = 79.63636016845703
 
   const scrollToActiveLyric = useCallback((index: number) => {
-    if (scrollViewRef.current && lyricLineHeight > 0 && isAutoScrollEnabled) {
-      const scrollToY = Math.max(0, (index-1) * lyricLineHeight);
-      scrollViewRef.current.scrollTo({ y: scrollToY, animated: true });
+    if (flatListRef.current && isAutoScrollEnabled) {
+      flatListRef.current.scrollToIndex({ index: Math.max(0, index - 1), animated: true });
     }
-  }, [isAutoScrollEnabled, lyricLineHeight]);
+  }, [isAutoScrollEnabled]);
+
+  const getItemLayout = useCallback((data: any, index: number) => ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  }), []);
+
+  const renderItem = useCallback(({ item, index }: { item: Lyric; index: number }) => {
+    const adjustedPosition = progress.position - (song.lyricsDelay || 0);
+    const lyricTimeSeconds = timeToSeconds(item.timestamp);
+    const nextLyricTimeSeconds = index < song.lyrics.length - 1 
+      ? timeToSeconds(song.lyrics[index + 1].timestamp) 
+      : Infinity;
+    const isActive = adjustedPosition >= lyricTimeSeconds && adjustedPosition < nextLyricTimeSeconds;
+
+    return (
+      <LyricItem 
+        item={item}
+        currentTime={adjustedPosition}
+        isActive={isActive}
+      />
+    );
+  }, [progress.position, song.lyricsDelay, song.lyrics]);
 
   useEffect(() => {
     if (song && isAutoScrollEnabled) {
@@ -40,43 +72,21 @@ export function LyricsScrollView({ isAutoScrollEnabled, song }: LyricsScrollView
     }
   }, [progress.position, song, scrollToActiveLyric, isAutoScrollEnabled]);
 
-  const lyricLines = useMemo(() => {
-    if (!song) return null;
-
-    return song.lyrics.map((lyric, index) => {
-      let isActive = false;
-      if (isAutoScrollEnabled) {
-        const lyricTimeSeconds = timeToSeconds(lyric.timestamp);
-        const nextLyricTimeSeconds = index < song.lyrics.length - 1 
-          ? timeToSeconds(song.lyrics[index + 1].timestamp) 
-          : Infinity;
-        
-        const adjustedPosition = progress.position - (song.lyricsDelay || 0);
-        isActive = adjustedPosition >= lyricTimeSeconds && 
-                   adjustedPosition < nextLyricTimeSeconds;
-      }
-      
-      return (
-        <LyricLine 
-          key={index}
-          lyric={lyric} 
-          isActive={isActive}
-          currentTime={progress.position - (song.lyricsDelay || 0)}
-        />
-      );
-    });
-  }, [song, isAutoScrollEnabled, progress.position]);
-
   if (!song) return null;
 
   return (
-    <ScrollView 
-      ref={scrollViewRef} 
-      className="mt-4 px-4"
+    <FlatList
+      ref={flatListRef}
+      data={song.lyrics}
+      renderItem={renderItem}
+      keyExtractor={(item, index) => index.toString()}
+      getItemLayout={getItemLayout}
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={21}
+      removeClippedSubviews={true}
       scrollEnabled={!isAutoScrollEnabled}
-    >
-      {lyricLines}
-      <View style={{ height: lyricLineHeight * 5 }} />
-    </ScrollView>
+      contentContainerStyle={{ paddingTop: 16, paddingHorizontal: 16, paddingBottom: ITEM_HEIGHT * 5 }}
+    />
   );
 }
