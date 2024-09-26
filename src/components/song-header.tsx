@@ -18,7 +18,6 @@ export function SongHeader() {
   const setIsLiked = useSetIsLiked();
   const updateCurrentSong = useUpdateCurrentSong();
   const setIsOptionsModalVisible = useSetIsOptionsModalVisible();
-
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 

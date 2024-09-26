@@ -98,8 +98,8 @@ export const useSongStore = create<SongState>((set, get) => ({
   },
   loadAudio: async (song) => {
     if (!song) {
-      console.error('无法加载音频：歌曲数据不存在');
-      set({ errorMessage: '无法加载音频：歌曲数据不存在' });
+      // console.error('无法加载音频：歌曲数据不存在');
+      // set({ errorMessage: '无法加载音频：歌曲数据不存在' });
       return;
     }
   

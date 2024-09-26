@@ -4,7 +4,6 @@ import { StyleSheet, View } from 'react-native';
 import { AutoScrollControl } from './auto-scroll-control';
 import PlayControl from './play-control';
 import { SongProgressBar } from './progress-bar';
-
 interface SongBottomProps {
     isAutoScrollEnabled: boolean;
     toggleAutoScroll: () => void;

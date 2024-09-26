@@ -41,5 +41,6 @@ export const useSong = (id: string) => {
       const songs = await fetchSongs();
       return songs.find(song => song.id === id);
     },
+    staleTime: 0,
   });
 };

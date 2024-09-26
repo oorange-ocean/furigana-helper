@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { TouchableOpacity } from 'react-native';
 
 import { colors } from '@/constants/tokens';
@@ -16,12 +16,27 @@ function PlayControl({
 }: PlayControlProps) {
   const isPlaying = useIsPlaying();
   const playPause = usePlayPause();
+  const animationFrameRef = useRef<number>();
 
   const handlePlayPause = useCallback(() => {
-    playPause();
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(() => {
+      playPause();
+    });
   }, [playPause]);
 
   const IconComponent = useMemo(() => isPlaying ? Pause : Play, [isPlaying]);
+
+  React.useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
     <TouchableOpacity onPress={handlePlayPause}>
