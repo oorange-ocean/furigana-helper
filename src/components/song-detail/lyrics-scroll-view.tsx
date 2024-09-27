@@ -13,12 +13,14 @@ interface LyricsScrollViewProps {
 
 const ITEM_HEIGHT = 79.63636016845703;
 
-const LyricItem = React.memo(({ item, currentTime, isActive }: 
-  { item: Lyric; currentTime: number; isActive: boolean }) => (
+const LyricItem = React.memo(({ item, currentTime, isActive, songId, lyricIndex }: 
+  { item: Lyric; currentTime: number; isActive: boolean; songId: string; lyricIndex: number }) => (
   <LyricLine 
     lyric={item} 
     isActive={isActive}
     currentTime={currentTime}
+    songId={songId}
+    lyricIndex={lyricIndex}
   />
 ));
 
@@ -51,6 +53,8 @@ export function LyricsScrollView({ isAutoScrollEnabled, song }: LyricsScrollView
         item={item}
         currentTime={adjustedPosition}
         isActive={isActive}
+        songId={song.id!}
+        lyricIndex={index}
       />
     );
   }, [progress.position, song.lyricsDelay, song.lyrics]);

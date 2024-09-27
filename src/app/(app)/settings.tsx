@@ -7,7 +7,7 @@ import { ItemsContainer } from '@/components/settings/items-container';
 import { LanguageItem } from '@/components/settings/language-item';
 import { ThemeItem } from '@/components/settings/theme-item';
 import { translate, useAuth } from '@/core';
-import { colors, FocusAwareStatusBar, ScrollView, Text, View } from '@/ui';
+import { colors, ScrollView, Text, View } from '@/ui';
 import { Github, Rate, Share, Support, Website } from '@/ui/icons';
 
 export default function Settings() {
@@ -17,10 +17,8 @@ export default function Settings() {
     colorScheme === 'dark' ? colors.neutral[400] : colors.neutral[500];
   return (
     <>
-      <FocusAwareStatusBar />
-
       <ScrollView>
-        <View className="flex-1 px-4 pt-16 ">
+        <View className="flex-1 px-4 pt-4 ">
           <Text className="text-xl font-bold">
             {translate('settings.title')}
           </Text>

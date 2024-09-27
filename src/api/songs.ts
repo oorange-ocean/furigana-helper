@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import * as FileSystem from 'expo-file-system';
 
-import type { Song } from '@/types/lyrics';
+import type { Lyric, Song } from '@/types/lyrics';
+
+const SONGS_DIR = `${FileSystem.documentDirectory}songs/`;
 
 const fetchSongs = async (): Promise<Song[]> => {
   const songsDir = `${FileSystem.documentDirectory}songs/`;
@@ -43,4 +45,32 @@ export const useSong = (id: string) => {
     },
     staleTime: 0,
   });
+};
+export const saveSong = async (song: Song): Promise<void> => {
+  const songFile = `${SONGS_DIR}${song.id}.json`;
+  try {
+    await FileSystem.makeDirectoryAsync(SONGS_DIR, { intermediates: true });
+    await FileSystem.writeAsStringAsync(songFile, JSON.stringify(song));
+  } catch (error) {
+    console.error('Error saving song:', error);
+    throw error;
+  }
+};
+
+export const updateLyric = async (songId: string, lyricIndex: number, updatedLyric: Lyric): Promise<Song> => {
+  try {
+    const songFile = `${SONGS_DIR}${songId}.json`;
+    const songContent = await FileSystem.readAsStringAsync(songFile);
+    const song: Song = JSON.parse(songContent);
+
+    const updatedLyrics = [...song.lyrics];
+    updatedLyrics[lyricIndex] = updatedLyric;
+
+    const updatedSong = { ...song, lyrics: updatedLyrics };
+    await saveSong(updatedSong);
+    return updatedSong;
+  } catch (error) {
+    console.error('Error updating lyric:', error);
+    throw error;
+  }
 };
