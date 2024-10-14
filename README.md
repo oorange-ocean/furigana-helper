@@ -1,49 +1,24 @@
-<h1 align="center">
-  <img alt="logo" src="./assets/icon.png" width="124px" style="border-radius:10px"/><br/>
-Mobile App </h1>
+# Furigana lyrics
 
-> This Project is based on [Obytes starter](https://starter.obytes.com)
+与Anthony Fu的项目撞车，已经暂停维护。
 
-## Requirements
+一款面向日音爱好者的音乐 APP， 核心特色为支持假名标注和语法分析、歌曲练习。
 
-- [React Native dev environment ](https://reactnative.dev/docs/environment-setup)
-- [Node.js LTS release](https://nodejs.org/en/)
-- [Git](https://git-scm.com/)
-- [Watchman](https://facebook.github.io/watchman/docs/install#buildinstall), required only for macOS or Linux users
-- [Pnpm](https://pnpm.io/installation)
-- [VS Code Editor](https://code.visualstudio.com/download) ⚠️ Make sure to install all recommended extension from `.vscode/extensions.json`
+## 预览
 
-## 👋 Quick start
+<div style="display: flex; justify-content: center; gap: 20px;">
+  <img src="assets/editor.jpg" alt="歌词编辑" width="200" height="auto">
+  <img src="assets/song.png" alt="播放界面" width="200" height="auto">
+</div>
 
-Clone the repo to your machine and install deps :
+## 技术栈
 
-```sh
-git clone https://github.com/user/repo-name
+- React Native
+- TypeScript
+- React Query
+- React Native Track Player
+- Kuromoji.js
 
-cd ./repo-name
+## 获取
 
-pnpm install
-```
-
-To run the app on ios
-
-```sh
-pnpm ios
-```
-
-To run the app on Android
-
-```sh
-pnpm android
-```
-
-## ✍️ Documentation
-
-- [Rules and Conventions](https://starter.obytes.com/getting-started/rules-and-conventions/)
-- [Project structure](https://starter.obytes.com/getting-started/project-structure)
-- [Environment vars and config](https://starter.obytes.com/getting-started/environment-vars-config)
-- [UI and Theming](https://starter.obytes.com/ui-and-theme/ui-theming)
-- [Components](https://starter.obytes.com/ui-and-theme/components)
-- [Forms](https://starter.obytes.com/ui-and-theme/Forms)
-- [Data fetching](https://starter.obytes.com/guides/data-fetching)
-- [Contribute to starter](https://starter.obytes.com/how-to-contribute/)
+目前仅支持安卓，iOS正在适配中。可以从Releases下载APK安装包进行体验。

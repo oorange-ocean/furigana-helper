@@ -24,7 +24,9 @@ const POS_COLORS = {
 const LyricLine: React.FC<Props> = memo(({ lyric, isActive, currentTime, songId, lyricIndex }) => {
   const [localLyric, setLocalLyric] = useState(lyric);
   const [editingWord, setEditingWord] = useState<{ word: { surface: string; reading: string }; index: number } | null>(null);
-      const shouldShowReading = (rb: string, rt: string) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const shouldShowReading = (rb: string, rt: string) => {
     if (rt.replace(/\*/g, '') === '') return false; // 忽略只包含 * 的读音
     return wanakana.toHiragana(rb) !== wanakana.toHiragana(rt);
   };
@@ -35,55 +37,65 @@ const LyricLine: React.FC<Props> = memo(({ lyric, isActive, currentTime, songId,
     else if (pos.includes('動詞')) color = POS_COLORS.動詞;
     else if (pos.includes('名詞')) color = POS_COLORS.名詞;
     else if (pos.includes('副詞')) color = POS_COLORS.副詞;
-    
+
     return { borderBottomWidth: 2, borderBottomColor: color };
   };
 
   const handleWordPress = (word: string) => {
-    const encodedWord = encodeURIComponent(word);
-    Linking.openURL(`mojisho://?search=${encodedWord}`);
+    try {
+      const encodedWord = encodeURIComponent(word);
+      Linking.openURL(`mojisho://?search=${encodedWord}`);
+    } catch (err: any) {
+      console.error('打开链接时出错:', err);
+      setError('无法打开词典链接。');
+    }
   };
+
   const handleWordLongPress = useCallback((word: { surface: string; reading: string }, index: number) => {
     setEditingWord({ word, index });
   }, []);
 
   const handleSaveWord = useCallback(async (newWord: { surface: string; reading: string }) => {
     if (editingWord) {
-      const updatedWords = [...localLyric.words];
-      updatedWords[editingWord.index] = {
-        ...updatedWords[editingWord.index],
-        surface: newWord.surface,
-        rubies: [{ rb: newWord.surface, rt: newWord.reading }],
-      };
-
-      const updatedLyric: Lyric = {
-        ...localLyric,
-        words: updatedWords,
-        original: updatedWords.map(w => w.surface).join(''),
-      };
-
-      // 乐观更新
-      setLocalLyric(updatedLyric);
-
       try {
+        setError(null); // 重置错误状态
+        const updatedWords = [...localLyric.words];
+        updatedWords[editingWord.index] = {
+          ...updatedWords[editingWord.index],
+          surface: newWord.surface,
+          rubies: [{ rb: newWord.surface, rt: newWord.reading }],
+        };
+
+        const updatedLyric: Lyric = {
+          ...localLyric,
+          words: updatedWords,
+          original: updatedWords.map(w => w.surface).join(''),
+        };
+
+        // 乐观更新
+        setLocalLyric(updatedLyric);
+
         await updateLyric(songId, lyricIndex, updatedLyric);
-      } catch (error) {
-        console.error('更新歌词时出错:', error);
+      } catch (err: any) {
+        console.error('更新歌词时出错:', err);
+        setError('更新歌词时出现错误。');
         // 如果更新失败，回滚到原始状态
         setLocalLyric(lyric);
       }
     }
     setEditingWord(null);
   }, [editingWord, localLyric, songId, lyricIndex, lyric]);
-  
+
   return (
     <View style={[styles.lineContainer, isActive && styles.activeLine]}>
+      {error && <Text style={styles.errorText}>错误: {error}</Text>}
       <View style={styles.wordsContainer}>
         {localLyric.words.map((word, wordIndex) => (
           <TouchableOpacity
             key={wordIndex}
             onPress={() => handleWordPress(word.surface)}
-            onLongPress={() => handleWordLongPress({ surface: word.surface, reading: word.rubies[0]?.rt || '' }, wordIndex)}            style={styles.wordContainer}
+            onLongPress={() => handleWordLongPress({ surface: word.surface, reading: word.rubies[0]?.rt || '' }, wordIndex)}
+            style={styles.wordContainer}
           >
             {word.rubies.map((ruby, rubyIndex) => (
               <View key={rubyIndex} style={styles.rubyContainer}>
@@ -153,5 +165,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
     marginTop: 4,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 4,
   },
 });

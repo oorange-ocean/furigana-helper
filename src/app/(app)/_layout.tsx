@@ -4,7 +4,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { useAuth, useIsFirstTime } from '@/core';
 import { EditIcon } from '@/ui/icons';
-import { Feed as FeedIcon, Settings as SettingsIcon } from '@/ui/icons';
+import { Feed as FeedIcon } from '@/ui/icons';
 
 export default function TabLayout() {
   const status = useAuth.use.status();
@@ -23,9 +23,9 @@ export default function TabLayout() {
   if (isFirstTime) {
     return <Redirect href="/onboarding" />;
   }
-  if (status === 'signOut') {
-    return <Redirect href="/login" />;
-  }
+  // if (status === 'signOut') {
+  //   return <Redirect href="/login" />;
+  // }
   return (
     <Tabs>
       <Tabs.Screen
@@ -47,7 +47,7 @@ export default function TabLayout() {
           headerShown: false,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
@@ -55,7 +55,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <SettingsIcon color={color} />,
           tabBarTestID: 'settings-tab',
         }}
-      />
+      /> */}
     </Tabs>
   );
 }

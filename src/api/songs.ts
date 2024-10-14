@@ -74,3 +74,13 @@ export const updateLyric = async (songId: string, lyricIndex: number, updatedLyr
     throw error;
   }
 };
+
+export const deleteSong = async (songId: string): Promise<void> => {
+  const songFile = `${SONGS_DIR}${songId}.json`;
+  try {
+    await FileSystem.deleteAsync(songFile);
+  } catch (error) {
+    console.error('删除歌曲时出错:', error);
+    throw error;
+  }
+};

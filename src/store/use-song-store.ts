@@ -179,5 +179,3 @@ export const useSongListActions = () => useSongStore(
 )
 );
 
-// 在应用启动时加载歌曲列表
-useSongStore.getState().loadSongList();

@@ -25,13 +25,13 @@ export default function Onboarding() {
           🚀 日语语法分析功能，自动划分结构并添加假名
         </Text>
         <Text className="my-1 text-left text-lg">
-          🥷 学习模式，针对每句歌词进行单词、语法的学习
+          🥷 点击单词，跳转到 moji 词典
         </Text>
         <Text className="my-1 text-left text-lg">
-          🧩 苹果风格，简洁优雅
+          🧩 机器识别不准确？长按单词进行编辑
         </Text>
         <Text className="my-1 text-left text-lg">
-          💪 支持Anki同步，帮助你更好的记忆
+          💪 可调整偏差时间，适应不同音源
         </Text>
       </View>
       <SafeAreaView className="mt-6">
@@ -39,7 +39,7 @@ export default function Onboarding() {
           label="Let's Get Started "
           onPress={() => {
             setIsFirstTime(false);
-            router.replace('/login');
+            router.replace('/(app)');
           }}
         />
       </SafeAreaView>

@@ -5,13 +5,13 @@
   "build": {
     "production": {
       "channel": "production",
-      "distribution": "store",
+      "distribution": "internal",
       "pnpm": "8.15.4",
       "ios": {
         "image": "latest"
       },
       "android": {
-        "buildType": "app-bundle",
+        "buildType": "apk",
         "image": "latest"
       },
       "env": {
